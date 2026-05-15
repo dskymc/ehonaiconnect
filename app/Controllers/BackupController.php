@@ -3,6 +3,7 @@
 
 namespace App\Controllers;
 
+use App\Models\AuditLogModel;
 use CodeIgniter\HTTP\DownloadResponse;
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -66,6 +67,15 @@ class BackupController extends BaseController
         }
 
         $download->setFileName($downloadName);
+
+        /** @var AuditLogModel $auditLogModel */
+        $auditLogModel = model(AuditLogModel::class);
+        $auditLogModel->insert([
+            'user_id'    => (int) session()->get('id'),
+            'aksi'       => 'BACKUP_DATABASE',
+            'deskripsi'  => 'Mengunduh cadangan database: ' . $downloadName,
+            'ip_address' => mb_substr($this->request->getIPAddress(), 0, 45),
+        ]);
 
         return $download;
     }

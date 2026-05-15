@@ -1,3 +1,4 @@
+<?php // Coded by DskyMC ?>
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -180,6 +181,25 @@
                            value="<?= esc(old('nama_lengkap', '')) ?>" required maxlength="150"
                            placeholder="Nama lengkap penanggung jawab">
                 </div>
+            </div>
+            <div class="mb-3">
+                <label for="no_hp" class="form-label">Nomor WhatsApp (Aktif) <span class="text-danger">*</span></label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-whatsapp"></i></span>
+                    <input type="text" name="no_hp" id="no_hp" class="form-control border-start-0 ps-0"
+                           value="<?= esc(old('no_hp', '')) ?>" required maxlength="20" inputmode="tel"
+                           placeholder="Contoh: 081234567890">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="email" class="form-label">Alamat Email</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-envelope"></i></span>
+                    <input type="email" name="email" id="email" class="form-control border-start-0 ps-0"
+                           value="<?= esc(old('email', '')) ?>" maxlength="100" autocomplete="email"
+                           placeholder="nama@domain.go.id">
+                </div>
+                <div class="form-text small">Email boleh dikosongkan.</div>
             </div>
             <div class="mb-3">
                 <label for="instansi_opd" class="form-label">Instansi OPD</label>

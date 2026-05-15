@@ -1,3 +1,4 @@
+<?php // Coded by DskyMC ?>
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('title') ?>Manajemen Pengguna<?= $this->endSection() ?>
@@ -41,9 +42,11 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
                         <th scope="col">Nama Lengkap</th>
                         <th scope="col">Instansi OPD</th>
                         <th scope="col">Username</th>
+                        <th scope="col" class="text-nowrap">No. HP</th>
+                        <th scope="col">Email</th>
                         <th scope="col" class="text-center text-nowrap" style="width: 7rem;">Role</th>
                         <th scope="col" class="text-center text-nowrap" style="width: 11rem;">Status</th>
-                        <th scope="col" class="text-center text-nowrap" style="width: 14rem;">Aksi</th>
+                        <th scope="col" class="text-center text-nowrap" style="width: 18rem;">Aksi</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -62,6 +65,8 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
                             <td class="fw-medium"><?= esc($u->nama_lengkap) ?></td>
                             <td><?= esc($u->instansi_opd ?? '—') ?></td>
                             <td><code class="small bg-light px-2 py-1 rounded"><?= esc($u->username) ?></code></td>
+                            <td class="small"><?= esc((string) ($u->no_hp ?? '')) !== '' ? esc((string) $u->no_hp) : '—' ?></td>
+                            <td class="small text-break"><?= ! empty($u->email) ? esc((string) $u->email) : '—' ?></td>
                             <td class="text-center">
                                 <span class="badge rounded-pill <?= esc($roleClass, 'attr') ?>"><?= esc(strtoupper($role)) ?></span>
                             </td>
@@ -77,6 +82,16 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
                                 <?php endif; ?>
                             </td>
                             <td class="text-center text-nowrap">
+                                <button type="button"
+                                        class="btn btn-sm btn-outline-secondary btn-edit-kontak"
+                                        data-bs-toggle="modal"
+                                        data-bs-target="#modalEditKontak"
+                                        data-user-id="<?= (int) $u->id ?>"
+                                        data-user-name="<?= esc($u->nama_lengkap, 'attr') ?>"
+                                        data-no-hp="<?= esc((string) ($u->no_hp ?? ''), 'attr') ?>"
+                                        data-email="<?= esc((string) ($u->email ?? ''), 'attr') ?>">
+                                    <i class="bi bi-telephone"></i> Kontak
+                                </button>
                                 <button type="button"
                                         class="btn btn-sm btn-outline-primary btn-reset-pw"
                                         data-bs-toggle="modal"
@@ -132,6 +147,17 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
                                value="<?= esc(old('nama_lengkap', '')) ?>">
                     </div>
                     <div class="col-md-6">
+                        <label for="no_hp_tambah" class="form-label fw-semibold small">No. HP / WhatsApp <span class="text-danger">*</span></label>
+                        <input type="text" name="no_hp" id="no_hp_tambah" class="form-control" required maxlength="20" inputmode="tel"
+                               value="<?= esc(old('no_hp', '')) ?>" placeholder="08xxxxxxxxxx">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="email_tambah" class="form-label fw-semibold small">Email</label>
+                        <input type="email" name="email" id="email_tambah" class="form-control" maxlength="100" autocomplete="off"
+                               value="<?= esc(old('email', '')) ?>" placeholder="opsional">
+                        <div class="form-text small">Email boleh dikosongkan.</div>
+                    </div>
+                    <div class="col-md-6">
                         <label for="username" class="form-label fw-semibold small">Username <span class="text-danger">*</span></label>
                         <input type="text" name="username" id="username" class="form-control" required maxlength="100" autocomplete="off"
                                value="<?= esc(old('username', '')) ?>">
@@ -164,6 +190,37 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
                         <input type="password" name="password" id="password_tambah" class="form-control" required minlength="8" maxlength="255" autocomplete="new-password">
                         <div class="form-text">Minimal 8 karakter.</div>
                     </div>
+                </div>
+            </div>
+            <div class="modal-footer border-top bg-light">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan</button>
+            </div>
+            <?= form_close() ?>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: Edit kontak -->
+<div class="modal fade" id="modalEditKontak" tabindex="-1" aria-labelledby="modalEditKontakLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h2 class="modal-title h5 fw-semibold" id="modalEditKontakLabel">Edit kontak</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
+            </div>
+            <?= form_open('user/update/0', ['id' => 'formEditKontak']) ?>
+            <?= csrf_field() ?>
+            <div class="modal-body">
+                <p class="small text-muted mb-3">Pengguna: <strong id="editKontakUserLabel">—</strong></p>
+                <div class="mb-3">
+                    <label for="no_hp_edit" class="form-label fw-semibold small">No. HP / WhatsApp <span class="text-danger">*</span></label>
+                    <input type="text" name="no_hp" id="no_hp_edit" class="form-control" required maxlength="20" inputmode="tel">
+                </div>
+                <div class="mb-0">
+                    <label for="email_edit" class="form-label fw-semibold small">Email</label>
+                    <input type="email" name="email" id="email_edit" class="form-control" maxlength="100" autocomplete="off">
+                    <div class="form-text small">Email boleh dikosongkan.</div>
                 </div>
             </div>
             <div class="modal-footer border-top bg-light">
@@ -254,6 +311,7 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
 (function () {
     const baseReset = <?= json_encode(site_url('user/update-password')) ?>;
     const baseHapus = <?= json_encode(site_url('user/delete')) ?>;
+    const baseKontak = <?= json_encode(rtrim(site_url('user/update'), '/')) ?>;
     const wrapInstansi = document.getElementById('wrapInstansiTambah');
     const roleTambah = document.getElementById('role_tambah');
     const instansiSelect = document.getElementById('instansi_opd_select');
@@ -310,6 +368,26 @@ $isOpdOldTambah  = $roleOldTambah === 'opd';
             if (form) form.setAttribute('action', baseHapus + '/' + encodeURIComponent(id));
             if (elNama) elNama.textContent = nama;
             if (elUser) elUser.textContent = uname;
+        });
+    }
+
+    const modalKontak = document.getElementById('modalEditKontak');
+    if (modalKontak) {
+        modalKontak.addEventListener('show.bs.modal', function (ev) {
+            const btn = ev.relatedTarget;
+            if (!btn || !btn.getAttribute) return;
+            const id = btn.getAttribute('data-user-id');
+            const nama = btn.getAttribute('data-user-name') || '—';
+            const noHp = btn.getAttribute('data-no-hp') || '';
+            const email = btn.getAttribute('data-email') || '';
+            const form = document.getElementById('formEditKontak');
+            const label = document.getElementById('editKontakUserLabel');
+            const inpHp = document.getElementById('no_hp_edit');
+            const inpEm = document.getElementById('email_edit');
+            if (form) form.setAttribute('action', baseKontak + '/' + encodeURIComponent(id));
+            if (label) label.textContent = nama;
+            if (inpHp) inpHp.value = noHp;
+            if (inpEm) inpEm.value = email;
         });
     }
 

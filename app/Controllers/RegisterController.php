@@ -20,6 +20,8 @@ class RegisterController extends BaseController
         $rules = [
             'nama_lengkap' => 'required|max_length[150]',
             'instansi_opd' => 'required|max_length[150]',
+            'no_hp'        => 'required|max_length[20]',
+            'email'        => 'permit_empty|max_length[100]|valid_email',
             'username'     => 'required|max_length[100]|is_unique[users.username]',
             'password'     => 'required|min_length[8]|max_length[255]',
         ];
@@ -43,10 +45,14 @@ class RegisterController extends BaseController
         /** @var UserModel $userModel */
         $userModel = model(UserModel::class);
 
+        $emailRaw = trim((string) $this->request->getPost('email'));
+
         $inserted = $userModel->insert([
             'username'     => (string) $this->request->getPost('username'),
             'password'     => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'nama_lengkap' => (string) $this->request->getPost('nama_lengkap'),
+            'no_hp'        => (string) $this->request->getPost('no_hp'),
+            'email'        => $emailRaw === '' ? null : $emailRaw,
             'instansi_opd' => $instansiPost,
             'role'         => 'opd',
             'is_active'    => 0,
@@ -54,6 +60,25 @@ class RegisterController extends BaseController
 
         if ($inserted === false) {
             return redirect()->back()->withInput()->with('error', implode(' ', $userModel->errors()));
+        }
+
+        helper(['email']);
+        $noHpReg = (string) $this->request->getPost('no_hp');
+        $emailReg = $emailRaw === '' ? '-' : $emailRaw;
+        $bodyAdmin = 'OPD baru mendaftar melalui formulir registrasi e-Honai Connect.' . "\n\n"
+            . 'Nama lengkap: ' . (string) $this->request->getPost('nama_lengkap') . "\n"
+            . 'Username: ' . (string) $this->request->getPost('username') . "\n"
+            . 'Instansi OPD: ' . $instansiPost . "\n"
+            . 'Nomor WhatsApp: ' . $noHpReg . "\n"
+            . 'Email: ' . $emailReg . "\n\n"
+            . 'Silakan lakukan verifikasi akun di menu Manajemen OPD (Admin).';
+
+        foreach (ehonai_admin_notify_recipients() as $adminEmail) {
+            sendNotification(
+                $adminEmail,
+                '[e-Honai Connect] Registrasi OPD baru menunggu verifikasi',
+                $bodyAdmin
+            );
         }
 
         return redirect()->to('/login')->with(

@@ -41,6 +41,7 @@ $routes->post('profile/update', 'ProfileController::update', ['filter' => 'auth'
 $routes->group('user', ['filter' => 'auth'], static function ($routes) {
     $routes->get('/', 'UserController::index');
     $routes->post('store', 'UserController::store');
+    $routes->post('update/(:num)', 'UserController::update/$1');
     $routes->post('update-password/(:num)', 'UserController::updatePassword/$1');
     $routes->post('delete/(:num)', 'UserController::delete/$1');
     $routes->get('toggle-status/(:num)', 'UserController::toggleStatus/$1');
@@ -53,6 +54,13 @@ $routes->group('ticket', ['filter' => 'auth'], static function ($routes) {
     $routes->get('show/(:num)', 'TicketController::show/$1');
     $routes->post('reply', 'TicketController::reply');
     $routes->post('update-status/(:num)', 'TicketController::updateStatus/$1');
+});
+
+$routes->group('faq', ['filter' => 'auth'], static function ($routes) {
+    $routes->get('/', 'FaqController::index');
+    $routes->post('store', 'FaqController::store');
+    $routes->post('update/(:num)', 'FaqController::update/$1');
+    $routes->post('delete/(:num)', 'FaqController::delete/$1');
 });
 
 /*
@@ -68,3 +76,4 @@ $routes->group('report', ['filter' => 'admin'], static function ($routes) {
 });
 
 $routes->get('backup', 'BackupController::index', ['filter' => 'admin']);
+$routes->get('audit', 'AuditController::index', ['filter' => 'admin']);

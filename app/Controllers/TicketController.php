@@ -3,6 +3,7 @@
 
 namespace App\Controllers;
 
+use App\Models\AuditLogModel;
 use App\Models\NotificationModel;
 use App\Models\TicketModel;
 use App\Models\TicketReplyModel;
@@ -40,13 +41,21 @@ class TicketController extends BaseController
         }
 
         $opdUsers = [];
+        /** @var UserModel $userModel */
+        $userModel = model(UserModel::class);
         if (session()->get('role') === 'admin') {
-            /** @var UserModel $userModel */
-            $userModel = model(UserModel::class);
-            $opdUsers  = $userModel->where('role', 'opd')->orderBy('nama_lengkap', 'ASC')->findAll();
+            $opdUsers = $userModel->where('role', 'opd')->orderBy('nama_lengkap', 'ASC')->findAll();
         }
 
-        return view('ticket/create', ['opdUsers' => $opdUsers]);
+        $currentUser  = $userModel->find((int) session()->get('id'));
+        $defaultNoHp  = (string) ($currentUser->no_hp ?? '');
+        $defaultEmail = (string) ($currentUser->email ?? '');
+
+        return view('ticket/create', [
+            'opdUsers'     => $opdUsers,
+            'defaultNoHp'  => $defaultNoHp,
+            'defaultEmail' => $defaultEmail,
+        ]);
     }
 
     public function store(): RedirectResponse
@@ -58,10 +67,12 @@ class TicketController extends BaseController
         $isAdmin = session()->get('role') === 'admin';
 
         $rules = [
-            'judul_laporan' => 'required|max_length[255]',
-            'kategori'      => 'required|max_length[100]',
-            'prioritas'     => 'required|in_list[Low,Medium,High]',
-            'deskripsi'     => 'required',
+            'judul_laporan'   => 'required|max_length[255]',
+            'kategori'        => 'required|max_length[100]',
+            'prioritas'       => 'required|in_list[Low,Medium,High]',
+            'deskripsi'       => 'required',
+            'no_hp_pelapor'   => 'required|max_length[20]',
+            'email_pelapor'   => 'permit_empty|max_length[100]|valid_email',
         ];
 
         if ($isAdmin) {
@@ -127,11 +138,15 @@ class TicketController extends BaseController
         /** @var TicketModel $ticketModel */
         $ticketModel = model(TicketModel::class);
 
+        $emailPelapor = trim((string) $this->request->getPost('email_pelapor'));
+
         $inserted = $ticketModel->insert([
             'nomor_tiket'       => $ticketModel->generateNomorTiket(),
             'user_id'           => $userId,
             'pelapor_nama'      => $pelaporNama,
             'pelapor_instansi'  => $pelaporInstansi,
+            'no_hp_pelapor'     => (string) $this->request->getPost('no_hp_pelapor'),
+            'email_pelapor'     => $emailPelapor === '' ? null : $emailPelapor,
             'kategori'          => (string) $this->request->getPost('kategori'),
             'prioritas'         => (string) $this->request->getPost('prioritas'),
             'status'            => 'Baru',
@@ -143,6 +158,36 @@ class TicketController extends BaseController
 
         if ($inserted === false) {
             return redirect()->back()->withInput()->with('error', implode(' ', $ticketModel->errors()));
+        }
+
+        $newTicketId = (int) $inserted;
+        $createdRow  = $ticketModel->find($newTicketId);
+        if ($createdRow !== null) {
+            /** @var AuditLogModel $auditLogModel */
+            $auditLogModel = model(AuditLogModel::class);
+            $auditLogModel->insert([
+                'user_id'    => (int) session()->get('id'),
+                'aksi'       => 'BUAT_TIKET',
+                'deskripsi'  => 'Membuat tiket ' . $createdRow->nomor_tiket . ': ' . $createdRow->judul_laporan,
+                'ip_address' => mb_substr($this->request->getIPAddress(), 0, 45),
+            ]);
+
+            helper(['email']);
+            $bodyAdmin = 'Tiket laporan baru masuk ke sistem e-Honai Connect.' . "\n\n"
+                . 'Nomor tiket: ' . $createdRow->nomor_tiket . "\n"
+                . 'Judul: ' . $createdRow->judul_laporan . "\n"
+                . 'Kategori: ' . $createdRow->kategori . "\n"
+                . 'Prioritas: ' . $createdRow->prioritas . "\n"
+                . 'Status: ' . $createdRow->status . "\n\n"
+                . 'Silakan tinjau daftar tiket di panel Admin.';
+
+            foreach (ehonai_admin_notify_recipients() as $adminEmail) {
+                sendNotification(
+                    $adminEmail,
+                    '[e-Honai Connect] Tiket baru: ' . $createdRow->nomor_tiket,
+                    $bodyAdmin
+                );
+            }
         }
 
         return redirect()->to('/ticket')->with('success', 'Tiket berhasil dibuat.');
@@ -216,6 +261,15 @@ class TicketController extends BaseController
             'status' => $newStatus,
         ]);
 
+        /** @var AuditLogModel $auditLogModel */
+        $auditLogModel = model(AuditLogModel::class);
+        $auditLogModel->insert([
+            'user_id'    => (int) session()->get('id'),
+            'aksi'       => 'UPDATE_STATUS_TIKET',
+            'deskripsi'  => 'Mengubah status tiket ' . $ticket->nomor_tiket . ' (ID #' . $id . ') dari "' . $oldStatus . '" menjadi "' . $newStatus . '".',
+            'ip_address' => mb_substr($this->request->getIPAddress(), 0, 45),
+        ]);
+
         $uidPelapor = (int) $ticket->user_id;
         if ($uidPelapor > 0) {
             /** @var NotificationModel $notificationModel */
@@ -227,6 +281,28 @@ class TicketController extends BaseController
                 'is_read'   => 0,
             ]);
         }
+
+        helper(['email']);
+        $pelaporEmail = trim((string) ($ticket->email_pelapor ?? ''));
+        if ($pelaporEmail === '' && (int) $ticket->user_id > 0) {
+            $userPelapor = model(UserModel::class)->find((int) $ticket->user_id);
+            if ($userPelapor !== null) {
+                $pelaporEmail = trim((string) ($userPelapor->email ?? ''));
+            }
+        }
+
+        $bodyPel = 'Status tiket laporan Anda pada e-Honai Connect telah diperbarui.' . "\n\n"
+            . 'Nomor tiket: ' . $ticket->nomor_tiket . "\n"
+            . 'Judul: ' . $ticket->judul_laporan . "\n"
+            . 'Status sebelumnya: ' . $oldStatus . "\n"
+            . 'Status saat ini: ' . $newStatus . "\n\n"
+            . 'Silakan buka aplikasi untuk melihat detail tiket.';
+
+        sendNotification(
+            $pelaporEmail !== '' ? $pelaporEmail : null,
+            '[e-Honai Connect] Pembaruan status tiket ' . $ticket->nomor_tiket,
+            $bodyPel
+        );
 
         return redirect()->to('/ticket/show/' . $id)->with('success', 'Status tiket diperbarui.');
     }

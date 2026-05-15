@@ -3,6 +3,7 @@
 
 namespace App\Controllers;
 
+use App\Models\AuditLogModel;
 use App\Models\UserModel;
 use CodeIgniter\HTTP\RedirectResponse;
 
@@ -61,7 +62,18 @@ class AuthController extends BaseController
                 'nama_lengkap' => $user->nama_lengkap,
                 'role'         => $user->role,
                 'instansi_opd' => $user->instansi_opd,
+                'no_hp'        => (string) ($user->no_hp ?? ''),
+                'email'        => $user->email !== null && $user->email !== '' ? (string) $user->email : '',
                 'isLoggedIn'   => true,
+            ]);
+
+            /** @var AuditLogModel $auditLogModel */
+            $auditLogModel = model(AuditLogModel::class);
+            $auditLogModel->insert([
+                'user_id'    => (int) $user->id,
+                'aksi'       => 'LOGIN',
+                'deskripsi'  => 'Login berhasil (username: ' . $user->username . ').',
+                'ip_address' => mb_substr($this->request->getIPAddress(), 0, 45),
             ]);
 
             return redirect()->to('/dashboard');

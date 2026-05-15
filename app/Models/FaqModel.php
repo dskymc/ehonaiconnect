@@ -5,22 +5,16 @@ namespace App\Models;
 
 use CodeIgniter\Model;
 
-class UserModel extends Model
+class FaqModel extends Model
 {
-    protected $table         = 'users';
+    protected $table         = 'faqs';
     protected $primaryKey    = 'id';
     protected $returnType    = 'object';
     protected $useTimestamps = true;
     protected $createdField  = 'created_at';
     protected $updatedField  = 'updated_at';
     protected $allowedFields = [
-        'username',
-        'password',
-        'nama_lengkap',
-        'no_hp',
-        'email',
-        'instansi_opd',
-        'role',
-        'is_active',
+        'pertanyaan',
+        'jawaban',
     ];
 }

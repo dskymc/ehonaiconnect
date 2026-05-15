@@ -18,6 +18,8 @@ class TicketModel extends Model
         'user_id',
         'pelapor_nama',
         'pelapor_instansi',
+        'no_hp_pelapor',
+        'email_pelapor',
         'kategori',
         'prioritas',
         'status',
@@ -52,7 +54,8 @@ class TicketModel extends Model
     {
         $builder = $this->builder();
         $builder->select(
-            $this->table . '.*, COALESCE(users.nama_lengkap, ' . $this->table . '.pelapor_nama) AS nama_pelapor',
+            $this->table . '.*, COALESCE(users.nama_lengkap, ' . $this->table . '.pelapor_nama) AS nama_pelapor, '
+            . 'users.no_hp AS pelapor_user_no_hp, users.email AS pelapor_user_email',
             false
         );
         $builder->join('users', 'users.id = ' . $this->table . '.user_id', 'left');
@@ -73,7 +76,8 @@ class TicketModel extends Model
                 $this->table . '.*, '
                 . 'COALESCE(users.nama_lengkap, ' . $this->table . '.pelapor_nama) AS pelapor_nama_lengkap, '
                 . 'COALESCE(users.username, \'(tanpa akun)\') AS pelapor_username, '
-                . 'COALESCE(users.instansi_opd, ' . $this->table . '.pelapor_instansi) AS pelapor_instansi_opd',
+                . 'COALESCE(users.instansi_opd, ' . $this->table . '.pelapor_instansi) AS pelapor_instansi_opd, '
+                . 'users.no_hp AS pelapor_user_no_hp, users.email AS pelapor_user_email',
                 false
             )
             ->join('users', 'users.id = ' . $this->table . '.user_id', 'left')

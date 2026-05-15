@@ -45,6 +45,8 @@ class ProfileController extends BaseController
 
         $rules = [
             'nama_lengkap' => 'required|max_length[150]',
+            'no_hp'        => 'required|max_length[20]',
+            'email'        => 'permit_empty|max_length[100]|valid_email',
         ];
 
         $passwordBaru = trim((string) $this->request->getPost('password'));
@@ -60,8 +62,12 @@ class ProfileController extends BaseController
             );
         }
 
+        $emailRaw = trim((string) $this->request->getPost('email'));
+
         $data = [
             'nama_lengkap' => (string) $this->request->getPost('nama_lengkap'),
+            'no_hp'        => (string) $this->request->getPost('no_hp'),
+            'email'        => $emailRaw === '' ? null : $emailRaw,
         ];
 
         if ($passwordBaru !== '') {
@@ -83,6 +89,8 @@ class ProfileController extends BaseController
                 'nama_lengkap' => $fresh->nama_lengkap,
                 'role'         => $fresh->role,
                 'instansi_opd' => $fresh->instansi_opd,
+                'no_hp'        => (string) ($fresh->no_hp ?? ''),
+                'email'        => $fresh->email !== null && $fresh->email !== '' ? (string) $fresh->email : '',
             ]);
         }
 

@@ -61,6 +61,8 @@ class UserController extends BaseController
             'username'     => 'required|max_length[100]|is_unique[users.username]',
             'password'     => 'required|min_length[8]|max_length[255]',
             'role'         => 'required|in_list[opd,teknisi,admin]',
+            'no_hp'        => 'required|max_length[20]',
+            'email'        => 'permit_empty|max_length[100]|valid_email',
         ];
 
         if ($role === 'opd') {
@@ -91,10 +93,14 @@ class UserController extends BaseController
         /** @var UserModel $userModel */
         $userModel = model(UserModel::class);
 
+        $emailRaw = trim((string) $this->request->getPost('email'));
+
         $inserted = $userModel->insert([
             'username'     => (string) $this->request->getPost('username'),
             'password'     => password_hash((string) $this->request->getPost('password'), PASSWORD_DEFAULT),
             'nama_lengkap' => (string) $this->request->getPost('nama_lengkap'),
+            'no_hp'        => (string) $this->request->getPost('no_hp'),
+            'email'        => $emailRaw === '' ? null : $emailRaw,
             'instansi_opd' => $instansi,
             'role'         => $role,
             'is_active'    => 1,
@@ -108,6 +114,42 @@ class UserController extends BaseController
         }
 
         return redirect()->to('/user')->with('success', 'Pengguna baru berhasil ditambahkan.');
+    }
+
+    public function update(int $id): RedirectResponse
+    {
+        if ($redirect = $this->ensureAdmin()) {
+            return $redirect;
+        }
+
+        $rules = [
+            'no_hp' => 'required|max_length[20]',
+            'email' => 'permit_empty|max_length[100]|valid_email',
+        ];
+
+        if (! $this->validate($rules)) {
+            return redirect()->to('/user')->with(
+                'error',
+                implode(' ', $this->validator->getErrors())
+            );
+        }
+
+        /** @var UserModel $userModel */
+        $userModel = model(UserModel::class);
+        $user      = $userModel->find($id);
+
+        if ($user === null) {
+            return redirect()->to('/user')->with('error', 'Pengguna tidak ditemukan.');
+        }
+
+        $emailRaw = trim((string) $this->request->getPost('email'));
+
+        $userModel->update($id, [
+            'no_hp' => (string) $this->request->getPost('no_hp'),
+            'email' => $emailRaw === '' ? null : $emailRaw,
+        ]);
+
+        return redirect()->to('/user')->with('success', 'Kontak pengguna berhasil diperbarui.');
     }
 
     public function updatePassword(int $id): RedirectResponse
@@ -192,6 +234,21 @@ class UserController extends BaseController
         $new     = $current === 1 ? 0 : 1;
 
         $userModel->update($id, ['is_active' => $new]);
+
+        if ($new === 1 && $current === 0) {
+            helper(['email']);
+            $toOpd = trim((string) ($user->email ?? ''));
+            $bodyOpd = 'Yth. ' . $user->nama_lengkap . ",\n\n"
+                . 'Akun OPD Anda pada aplikasi e-Honai Connect telah diaktifkan oleh Admin Diskominfosatik Provinsi Papua Pegunungan.' . "\n\n"
+                . 'Anda sekarang dapat masuk (login) menggunakan username: ' . $user->username . "\n\n"
+                . 'Terima kasih.';
+
+            sendNotification(
+                $toOpd !== '' ? $toOpd : null,
+                '[e-Honai Connect] Akun OPD Anda telah diaktifkan',
+                $bodyOpd
+            );
+        }
 
         return redirect()->to('/user')->with('success', 'Status akun pengguna berhasil diperbarui.');
     }

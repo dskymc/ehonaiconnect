@@ -1,3 +1,4 @@
+<?php // Coded by DskyMC ?>
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('title') ?>Detail Tiket<?= $this->endSection() ?>
@@ -5,6 +6,18 @@
 <?= $this->section('content') ?>
 <?php
 $replies = $replies ?? [];
+$hpShow   = trim((string) ($ticket->no_hp_pelapor ?? ''));
+if ($hpShow === '') {
+    $hpShow = trim((string) ($ticket->pelapor_user_no_hp ?? ''));
+}
+$emShow = trim((string) ($ticket->email_pelapor ?? ''));
+if ($emShow === '') {
+    $emShow = trim((string) ($ticket->pelapor_user_email ?? ''));
+}
+$waDigits = preg_replace('/\D/', '', $hpShow);
+if ($waDigits !== '' && str_starts_with($waDigits, '0')) {
+    $waDigits = '62' . substr($waDigits, 1);
+}
 ?>
 <style>
     .diskusi-bubble-opd {
@@ -71,6 +84,22 @@ $replies = $replies ?? [];
                     <dd class="col-7"><?= esc($ticket->pelapor_username ?? '—') ?></dd>
                     <dt class="col-5">Instansi</dt>
                     <dd class="col-7"><?= esc($ticket->pelapor_instansi_opd ?? '—') ?></dd>
+                    <dt class="col-5">No. HP</dt>
+                    <dd class="col-7 small">
+                        <?php if ($hpShow !== '') : ?>
+                            <span><?= esc($hpShow) ?></span>
+                            <?php if ($waDigits !== '') : ?>
+                                <a href="https://wa.me/<?= esc($waDigits, 'attr') ?>" target="_blank" rel="noopener noreferrer"
+                                   class="btn btn-sm btn-success ms-1 py-0 px-2 align-baseline" title="Chat WhatsApp" aria-label="WhatsApp">
+                                    <i class="bi bi-whatsapp"></i>
+                                </a>
+                            <?php endif; ?>
+                        <?php else : ?>
+                            —
+                        <?php endif; ?>
+                    </dd>
+                    <dt class="col-5">Email</dt>
+                    <dd class="col-7 small text-break"><?= $emShow !== '' ? esc($emShow) : '—' ?></dd>
                 </dl>
             </div>
         </div>

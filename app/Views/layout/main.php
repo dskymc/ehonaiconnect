@@ -312,12 +312,18 @@
                 <a class="nav-link <?= str_starts_with(uri_string(), 'ticket') ? 'active' : '' ?>" href="<?= base_url('ticket') ?>">
                     <i class="bi bi-ticket-detailed"></i> Tiket Laporan
                 </a>
+                <a class="nav-link <?= uri_string() === 'faq' || str_starts_with(uri_string(), 'faq/') ? 'active' : '' ?>" href="<?= base_url('faq') ?>">
+                    <i class="bi bi-question-circle"></i> Pusat Bantuan (FAQ)
+                </a>
                 <?php if (session()->get('role') === 'admin') : ?>
                     <a class="nav-link <?= uri_string() === 'user' || str_starts_with(uri_string(), 'user/') ? 'active' : '' ?>" href="<?= base_url('user') ?>">
                         <i class="bi bi-building-gear"></i> Manajemen OPD
                     </a>
                     <a class="nav-link <?= uri_string() === 'report' || str_starts_with(uri_string(), 'report/') ? 'active' : '' ?>" href="<?= base_url('report') ?>">
                         <i class="bi bi-file-earmark-bar-graph"></i> Laporan Rekap
+                    </a>
+                    <a class="nav-link <?= uri_string() === 'audit' ? 'active' : '' ?>" href="<?= base_url('audit') ?>">
+                        <i class="bi bi-journal-text"></i> Log Sistem
                     </a>
                 <?php endif; ?>
             </nav>

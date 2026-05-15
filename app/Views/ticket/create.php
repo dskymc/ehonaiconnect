@@ -1,3 +1,4 @@
+<?php // Coded by DskyMC ?>
 <?= $this->extend('layout/main') ?>
 
 <?= $this->section('title') ?>Buat Tiket<?= $this->endSection() ?>
@@ -6,6 +7,8 @@
 <?php
 $hasOpdUsers = session()->get('role') === 'admin' && $opdUsers !== [];
 $oldMode     = old('pelapor_mode', $hasOpdUsers ? 'opd_terdaftar' : 'input_manual');
+$defaultNoHp = $defaultNoHp ?? '';
+$defaultEmail = $defaultEmail ?? '';
 ?>
 <h1 class="h4 fw-semibold text-secondary mb-3">Buat Tiket Baru</h1>
 
@@ -67,6 +70,25 @@ $oldMode     = old('pelapor_mode', $hasOpdUsers ? 'opd_terdaftar' : 'input_manua
         </div>
     </div>
 <?php endif; ?>
+
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+        <h2 class="h6 fw-semibold text-dark mb-3">Kontak laporan</h2>
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label for="no_hp_pelapor" class="form-label small fw-semibold">Nomor HP Kontak <span class="text-danger">*</span></label>
+                <input type="text" name="no_hp_pelapor" id="no_hp_pelapor" class="form-control" required maxlength="20" inputmode="tel"
+                       value="<?= esc(old('no_hp_pelapor', $defaultNoHp)) ?>" placeholder="08xxxxxxxxxx">
+            </div>
+            <div class="col-md-6">
+                <label for="email_pelapor" class="form-label small fw-semibold">Email Kontak</label>
+                <input type="email" name="email_pelapor" id="email_pelapor" class="form-control" maxlength="100" autocomplete="email"
+                       value="<?= esc(old('email_pelapor', $defaultEmail)) ?>" placeholder="opsional">
+                <div class="form-text small">Diisi otomatis dari profil Anda; dapat diubah jika perlu.</div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="mb-3">
     <label for="judul_laporan" class="form-label fw-semibold">Judul Laporan <span class="text-danger">*</span></label>
