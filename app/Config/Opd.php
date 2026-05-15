@@ -1,0 +1,62 @@
+<?php
+// Coded by DskyMC
+
+namespace Config;
+
+use CodeIgniter\Config\BaseConfig;
+
+class Opd extends BaseConfig
+{
+    /**
+     * Instansi default untuk akun internal (admin / teknisi).
+     */
+    public string $instansiInternal = 'DINAS KOMUNIKASI DAN INFORMATIKA, STATISTIK DAN PERSANDIAN';
+
+    /**
+     * Daftar instansi OPD / perangkat daerah (Pemprov Papua Pegunungan).
+     *
+     * @var list<string>
+     */
+    public array $listOpd = [
+        'DINAS PENDIDIKAN DAN KEBUDAYAAN',
+        'DINAS PEKERJAAN UMUM DAN PERUMAHAN RAKYAT',
+        'DINAS TENAGA KERJA, TRANSMIGRASI, ENERGI DAN SUMBER DAYA MINERAL',
+        'DINAS LINGKUNGAN HIDUP, KEHUTANAN DAN PERTANAHAN',
+        'DINAS PERHUBUNGAN',
+        'DINAS KOMUNIKASI DAN INFORMATIKA, STATISTIK DAN PERSANDIAN',
+        'DINAS PENANAMAN MODAL DAN PELAYANAN TERPADU SATU PINTU',
+        'SEKRETARIAT DAERAH',
+        'Biro Umum',
+        'Biro Hukum',
+        'Biro Organisasi',
+        'Biro Perekonomian dan Administrasi Pembangunan',
+        'Biro Pengadaan Barang dan Jasa',
+        'Biro Pemerintahan, Otonomi Khusus dan Kesejahteraan Rakyat',
+        'Biro Administrasi Pimpinan',
+        'SEKRETARIAT DEWAN PERWAKILAN RAKYAT',
+        'SEKRETARIAT MAJELIS RAKYAT PAPUA PEGUNUNGAN',
+        'BADAN PERENCANAAN PEMBANGUNAN, RISET DAN INOVASI DAERAH',
+        'BADAN PENGELOLAAN PENDAPATAN, KEUANGAN DAN ASET DAERAH',
+        'UPPD SAMSAT WAMENA',
+        'UPPD SAMSAT YAHUKIMO',
+        'BADAN KEPEGAWAIAN DAN PENGEMBANGAN SUMBER DAYA MANUSIA',
+        'BADAN KESATUAN BANGSA DAN POLITIK',
+        'INSPEKTORAT DAERAH',
+        'DINAS KEARSIPAN DAN PERPUSTAKAAN',
+        'BADAN PENGELOLA PERBATASAN DAN KERJASAMA',
+        'DINAS KESEHATAN',
+        'DINAS PENGENDALIAN PENDUDUK DAN KELUARGA BERENCANA',
+        'DINAS SOSIAL',
+        'DINAS PEMBERDAYAAN PEREMPUAN DAN PERLINDUNGAN ANAK',
+        'DINAS KEBAKARAN DAN PENYELAMATAN DAN SATUAN POLISI PAMONG PRAJA',
+        'DINAS KOPERASI DAN USAHA KECIL DAN MENENGAH',
+        'DINAS PERINDUSTRIAN DAN PERDAGANGAN',
+        'DINAS KEPEMUDAAN DAN OLAHRAGA',
+        'DINAS PARIWISATA DAN EKONOMI KREATIF',
+        'DINAS PANGAN, PERTANIAN DAN PERKEBUNAN',
+        'DINAS PETERNAKAN DAN PERIKANAN',
+        'DINAS KEPENDUDUKAN DAN PENCATATAN SIPIL',
+        'DINAS PEMBERDAYAAN MASYARAKAT DAN KAMPUNG',
+        'BADAN PENANGGULANGAN BENCANA DAERAH',
+    ];
+}

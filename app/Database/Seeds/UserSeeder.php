@@ -15,6 +15,7 @@ class UserSeeder extends Seeder
             'nama_lengkap' => 'Samuel DskyMC',
             'instansi_opd' => 'Diskominfosatik',
             'role'         => 'admin',
+            'is_active'    => 1,
             'created_at'   => date('Y-m-d H:i:s'),
             'updated_at'   => date('Y-m-d H:i:s'),
         ];

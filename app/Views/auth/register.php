@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login — e-Honai Connect</title>
+    <title>Registrasi OPD — e-Honai Connect</title>
     <link rel="icon" type="image/png" href="<?= base_url('assets/images/logo-papua-pegunungan.png') ?>">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -41,7 +41,7 @@
         }
 
         .login-center-wrap {
-            flex: 1 0 auto;
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,7 +52,7 @@
 
         .login-card {
             width: 100%;
-            max-width: 420px;
+            max-width: 460px;
             border: none;
             border-radius: var(--ehonai-card-radius);
             overflow: hidden;
@@ -69,9 +69,9 @@
         }
 
         .login-logo-img {
-            max-height: 7.5rem;
+            max-height: 5rem;
             width: auto;
-            max-width: 11rem;
+            max-width: 9rem;
             object-fit: contain;
             display: block;
             margin-left: auto;
@@ -83,14 +83,13 @@
             font-weight: 700;
             letter-spacing: -0.02em;
             color: var(--ehonai-navy);
-            font-size: 1.5rem;
+            font-size: 1.35rem;
         }
 
         .login-subtitle {
             font-weight: 500;
             color: #5c6b7a;
             font-size: 0.9rem;
-            letter-spacing: 0.02em;
         }
 
         .login-instansi {
@@ -134,84 +133,95 @@
             box-shadow: 0 0.45rem 1rem rgba(12, 35, 64, 0.35);
         }
 
-        .btn-login:active {
-            transform: translateY(1px);
-        }
-
         .login-alert {
             border-radius: 0.5rem;
             border: none;
             font-size: 0.875rem;
         }
+
+        .link-login {
+            font-weight: 600;
+            color: var(--ehonai-teal);
+        }
+
+        .link-login:hover {
+            color: var(--ehonai-navy-mid);
+        }
     </style>
 </head>
-<body class="login-body d-flex flex-column min-vh-100">
-<div class="login-center-wrap w-100 flex-grow-1">
+<body class="login-body">
+<div class="login-center-wrap">
     <div class="card login-card">
         <div class="login-card-accent" aria-hidden="true"></div>
         <div class="card-body p-4 p-md-5">
-            <div class="text-center mb-4">
+            <div class="text-center mb-3">
                 <img src="<?= base_url('assets/images/logo-papua-pegunungan.png') ?>"
                      alt="Lambang Provinsi Papua Pegunungan"
-                     class="login-logo-img mb-3"
+                     class="login-logo-img mb-2"
                      decoding="async">
-                <h1 class="login-title mb-1">e-Honai Connect</h1>
-                <p class="login-subtitle mb-2">Sistem Layanan Terpadu IT</p>
+                <h1 class="login-title mb-1">Registrasi OPD</h1>
+                <p class="login-subtitle mb-1">e-Honai Connect</p>
                 <p class="login-instansi mb-0">Dinas Komunikasi, Informatika, Persandian dan Statistik<br>Pemerintah Provinsi Papua Pegunungan</p>
             </div>
 
-            <?php if (session()->getFlashdata('success')) : ?>
-                <div class="alert alert-success login-alert d-flex align-items-start gap-2 mb-4" role="alert">
-                    <i class="bi bi-check-circle-fill flex-shrink-0 mt-1"></i>
-                    <span><?= esc(session()->getFlashdata('success')) ?></span>
-                </div>
-            <?php endif; ?>
-
             <?php if (session()->getFlashdata('error')) : ?>
-                <div class="alert alert-danger login-alert d-flex align-items-start gap-2 mb-4" role="alert">
+                <div class="alert alert-danger login-alert d-flex align-items-start gap-2 mb-3" role="alert">
                     <i class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"></i>
                     <span><?= esc(session()->getFlashdata('error')) ?></span>
                 </div>
             <?php endif; ?>
 
-            <?= form_open('/login', ['method' => 'post', 'class' => 'login-form']) ?>
+            <?= form_open('/register', ['method' => 'post', 'class' => 'register-form']) ?>
+            <div class="mb-3">
+                <label for="nama_lengkap" class="form-label">Nama Lengkap</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-person-badge"></i></span>
+                    <input type="text" name="nama_lengkap" id="nama_lengkap" class="form-control border-start-0 ps-0"
+                           value="<?= esc(old('nama_lengkap', '')) ?>" required maxlength="150"
+                           placeholder="Nama lengkap penanggung jawab">
+                </div>
+            </div>
+            <div class="mb-3">
+                <label for="instansi_opd" class="form-label">Instansi OPD</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-building"></i></span>
+                    <select name="instansi_opd" id="instansi_opd" class="form-select border-start-0 ps-0" required>
+                        <option value="">--- Pilih OPD ---</option>
+                        <?php foreach (config('Opd')->listOpd as $opd) : ?>
+                            <option value="<?= esc($opd, 'attr') ?>" <?= old('instansi_opd') === $opd ? 'selected' : '' ?>><?= esc($opd) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+            </div>
             <div class="mb-3">
                 <label for="username" class="form-label">Username</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-person"></i></span>
                     <input type="text" name="username" id="username" class="form-control border-start-0 ps-0"
                            autocomplete="username" value="<?= esc(old('username', '')) ?>" required maxlength="100"
-                           placeholder="Masukkan username">
+                           placeholder="Username untuk login">
                 </div>
             </div>
-            <div class="mb-4">
+            <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <div class="input-group">
                     <span class="input-group-text bg-light border-end-0 text-secondary"><i class="bi bi-key"></i></span>
                     <input type="password" name="password" id="password" class="form-control border-start-0 ps-0"
-                           autocomplete="current-password" required maxlength="255"
-                           placeholder="Masukkan password">
+                           autocomplete="new-password" required minlength="8" maxlength="255"
+                           placeholder="Minimal 8 karakter">
                 </div>
+                <div class="form-text small">Minimal 8 karakter.</div>
             </div>
-            <button type="submit" class="btn btn-login w-100 text-uppercase small">Login</button>
+            <button type="submit" class="btn btn-login w-100 text-uppercase small mb-3">Daftar</button>
             <?= form_close() ?>
 
-            <p class="text-center small text-muted mt-3 mb-0">
-                Belum punya akun OPD?
-                <a href="<?= base_url('register') ?>" class="text-decoration-none fw-semibold" style="color: var(--ehonai-teal);">Daftar di sini</a>
+            <p class="text-center small text-muted mb-0">
+                Sudah punya akun?
+                <a href="<?= base_url('login') ?>" class="link-login text-decoration-none">Login</a>
             </p>
         </div>
     </div>
 </div>
-
-<footer class="footer mt-auto py-3 bg-white border-top w-100 shadow-sm" style="border-color: rgba(12, 53, 105, 0.08) !important; position: relative; z-index: 1;">
-    <div class="container-fluid px-3 px-md-4">
-        <p class="small text-muted text-center mb-0">
-            Copyright &copy; <?= date('Y') ?> Diskominfosatik Provinsi Papua Pegunungan. e-Honai Connect Developed by APTIKA TEAM, Team Lead by ORL.
-        </p>
-    </div>
-</footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
         integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
         crossorigin="anonymous"></script>

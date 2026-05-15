@@ -19,5 +19,6 @@ class UserModel extends Model
         'nama_lengkap',
         'instansi_opd',
         'role',
+        'is_active',
     ];
 }

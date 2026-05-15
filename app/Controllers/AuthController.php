@@ -43,16 +43,36 @@ class AuthController extends BaseController
             );
         }
 
-        session()->set([
-            'id'           => $user->id,
-            'username'     => $user->username,
-            'nama_lengkap' => $user->nama_lengkap,
-            'role'         => $user->role,
-            'instansi_opd' => $user->instansi_opd,
-            'isLoggedIn'   => true,
-        ]);
+        $isActive = (int) ($user->is_active ?? 0);
 
-        return redirect()->to('/dashboard');
+        if ($isActive === 0) {
+            session()->destroy();
+
+            return redirect()->to('/login')->withInput()->with(
+                'error',
+                'Akun Anda belum diaktifkan. Silakan hubungi Admin Diskominfosatik.'
+            );
+        }
+
+        if ($isActive === 1) {
+            session()->set([
+                'id'           => $user->id,
+                'username'     => $user->username,
+                'nama_lengkap' => $user->nama_lengkap,
+                'role'         => $user->role,
+                'instansi_opd' => $user->instansi_opd,
+                'isLoggedIn'   => true,
+            ]);
+
+            return redirect()->to('/dashboard');
+        }
+
+        session()->destroy();
+
+        return redirect()->to('/login')->withInput()->with(
+            'error',
+            'Akun Anda belum diaktifkan. Silakan hubungi Admin Diskominfosatik.'
+        );
     }
 
     public function logout(): RedirectResponse
