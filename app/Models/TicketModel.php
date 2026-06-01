@@ -27,7 +27,65 @@ class TicketModel extends Model
         'deskripsi',
         'bukti_foto',
         'teknisi_id',
+        'librenms_device_id',
+        'librenms_alert_id',
+        'librenms_hostname',
+        'source',
     ];
+
+    public function findOpenByLibrenmsDeviceId(int $deviceId): ?object
+    {
+        if ($deviceId <= 0) {
+            return null;
+        }
+
+        return $this->where('librenms_device_id', $deviceId)
+            ->whereIn('status', ['Baru', 'Diproses', 'Tertunda'])
+            ->orderBy('id', 'DESC')
+            ->first();
+    }
+
+    /**
+     * @param array{
+     *   librenms_device_id: int,
+     *   librenms_alert_id?: int|null,
+     *   librenms_hostname?: string|null,
+     *   judul_laporan: string,
+     *   deskripsi: string,
+     *   prioritas: string,
+     *   kategori: string
+     * } $data
+     */
+    public function createFromLibrenmsAlert(array $data): ?int
+    {
+        $inserted = $this->insert([
+            'nomor_tiket'        => $this->generateNomorTiket(),
+            'user_id'            => null,
+            'pelapor_nama'       => 'Sistem LibreNMS',
+            'pelapor_instansi'   => 'Monitoring Otomatis',
+            'no_hp_pelapor'      => '-',
+            'email_pelapor'      => null,
+            'kategori'           => $data['kategori'],
+            'prioritas'          => $data['prioritas'],
+            'status'             => 'Baru',
+            'judul_laporan'      => $data['judul_laporan'],
+            'deskripsi'          => $data['deskripsi'],
+            'bukti_foto'         => null,
+            'teknisi_id'         => null,
+            'librenms_device_id' => $data['librenms_device_id'],
+            'librenms_alert_id'  => $data['librenms_alert_id'] ?? null,
+            'librenms_hostname'  => $data['librenms_hostname'] ?? null,
+            'source'             => 'librenms',
+        ]);
+
+        if ($inserted === false) {
+            log_message('error', 'Gagal membuat tiket dari LibreNMS: ' . json_encode($this->errors()));
+
+            return null;
+        }
+
+        return (int) $inserted;
+    }
 
     public function generateNomorTiket(): string
     {

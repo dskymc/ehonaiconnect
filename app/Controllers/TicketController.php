@@ -172,7 +172,8 @@ class TicketController extends BaseController
                 'ip_address' => mb_substr($this->request->getIPAddress(), 0, 45),
             ]);
 
-            helper(['email']);
+            helper(['email', 'whatsapp']);
+
             $bodyAdmin = 'Tiket laporan baru masuk ke sistem e-Honai Connect.' . "\n\n"
                 . 'Nomor tiket: ' . $createdRow->nomor_tiket . "\n"
                 . 'Judul: ' . $createdRow->judul_laporan . "\n"
@@ -187,6 +188,19 @@ class TicketController extends BaseController
                     '[e-Honai Connect] Tiket baru: ' . $createdRow->nomor_tiket,
                     $bodyAdmin
                 );
+            }
+
+            $ticketDetail = $ticketModel->getTicketWithPelapor($newTicketId);
+            if ($ticketDetail !== null) {
+                ehonai_send_whatsapp_to_admins(ehonai_whatsapp_new_ticket_message($ticketDetail));
+
+                $pelaporPhone = ehonai_resolve_ticket_pelapor_phone($ticketDetail);
+                if ($pelaporPhone !== null) {
+                    sendWhatsAppNotification(
+                        $pelaporPhone,
+                        ehonai_whatsapp_new_ticket_pelapor_message($ticketDetail)
+                    );
+                }
             }
         }
 
@@ -282,7 +296,7 @@ class TicketController extends BaseController
             ]);
         }
 
-        helper(['email']);
+        helper(['email', 'whatsapp']);
         $pelaporEmail = trim((string) ($ticket->email_pelapor ?? ''));
         if ($pelaporEmail === '' && (int) $ticket->user_id > 0) {
             $userPelapor = model(UserModel::class)->find((int) $ticket->user_id);
@@ -303,6 +317,14 @@ class TicketController extends BaseController
             '[e-Honai Connect] Pembaruan status tiket ' . $ticket->nomor_tiket,
             $bodyPel
         );
+
+        $pelaporPhone = ehonai_resolve_ticket_pelapor_phone($ticket);
+        if ($pelaporPhone !== null) {
+            sendWhatsAppNotification(
+                $pelaporPhone,
+                ehonai_whatsapp_ticket_status_message($ticket, $oldStatus, $newStatus)
+            );
+        }
 
         return redirect()->to('/ticket/show/' . $id)->with('success', 'Status tiket diperbarui.');
     }

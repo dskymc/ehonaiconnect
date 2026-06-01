@@ -53,6 +53,15 @@ $ticketStats = $ticketStats ?? [
     'sedang_dikerjakan' => 0,
     'selesai_bulan_ini' => 0,
 ];
+$nmsSummary = $nmsSummary ?? [
+    'available'     => false,
+    'message'       => '',
+    'total_active'  => 0,
+    'total_down'    => 0,
+    'active_alerts' => 0,
+    'devices_down'  => [],
+];
+$showNms = $showNms ?? false;
 ?>
 <div class="mb-4">
     <h1 class="h4 fw-semibold text-secondary mb-1">Dashboard</h1>
@@ -60,6 +69,84 @@ $ticketStats = $ticketStats ?? [
         Selamat Datang di e-Honai Connect, <span class="fw-semibold text-primary"><?= esc($namaUser) ?></span>
     </p>
 </div>
+
+<?php if ($showNms) : ?>
+<div class="row g-3 g-md-4 mb-4">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body p-4">
+                <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="rounded-3 bg-info bg-opacity-10 text-info p-2 d-inline-flex">
+                            <i class="bi bi-hdd-network fs-4" aria-hidden="true"></i>
+                        </span>
+                        <h2 class="h5 fw-semibold text-secondary mb-0">Monitoring Perangkat (LibreNMS)</h2>
+                    </div>
+                    <a href="<?= site_url('monitoring') ?>" class="btn btn-sm btn-outline-primary">Kelola Monitoring</a>
+                </div>
+                <?php if (! ($nmsSummary['available'] ?? false)) : ?>
+                    <div class="alert alert-secondary mb-0 py-2">
+                        <?= esc($nmsSummary['message'] ?? 'LibreNMS tidak tersedia') ?>
+                    </div>
+                <?php else : ?>
+                    <div class="row g-3 mb-3">
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded-3 p-3 text-center h-100">
+                                <div class="small text-muted text-uppercase">Perangkat Aktif</div>
+                                <div class="fs-3 fw-bold text-primary"><?= (int) $nmsSummary['total_active'] ?></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded-3 p-3 text-center h-100">
+                                <div class="small text-muted text-uppercase">Down</div>
+                                <div class="fs-3 fw-bold text-danger"><?= (int) $nmsSummary['total_down'] ?></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded-3 p-3 text-center h-100">
+                                <div class="small text-muted text-uppercase">Alert Aktif</div>
+                                <div class="fs-3 fw-bold text-warning"><?= (int) $nmsSummary['active_alerts'] ?></div>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-3">
+                            <div class="border rounded-3 p-3 text-center h-100">
+                                <div class="small text-muted text-uppercase">Sumber</div>
+                                <div class="fs-6 fw-semibold text-secondary mt-2">LibreNMS</div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php if (($nmsSummary['devices_down'] ?? []) !== []) : ?>
+                        <p class="small fw-semibold text-secondary mb-2">Perangkat Down (maks. 10)</p>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr><th>Hostname</th><th>Lokasi</th><th>OS</th><th></th></tr>
+                                </thead>
+                                <tbody>
+                                <?php foreach ($nmsSummary['devices_down'] as $dev) : ?>
+                                    <tr>
+                                        <td><?= esc($dev['display'] ?? $dev['hostname'] ?? '') ?></td>
+                                        <td><?= esc($dev['location'] ?? '-') ?></td>
+                                        <td><?= esc($dev['os'] ?? '-') ?></td>
+                                        <td class="text-end">
+                                            <?php if (! empty($dev['url'])) : ?>
+                                                <a href="<?= esc($dev['url']) ?>" class="btn btn-sm btn-outline-secondary" target="_blank" rel="noopener">LibreNMS</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                                </tbody>
+                            </table>
+                        </div>
+                    <?php else : ?>
+                        <p class="small text-success mb-0"><i class="bi bi-check-circle me-1"></i>Semua perangkat terpantau dalam status up.</p>
+                    <?php endif; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <div class="row g-3 g-md-4 mb-4">
     <div class="col-12">

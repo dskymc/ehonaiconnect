@@ -236,7 +236,7 @@ class UserController extends BaseController
         $userModel->update($id, ['is_active' => $new]);
 
         if ($new === 1 && $current === 0) {
-            helper(['email']);
+            helper(['email', 'whatsapp']);
             $toOpd = trim((string) ($user->email ?? ''));
             $bodyOpd = 'Yth. ' . $user->nama_lengkap . ",\n\n"
                 . 'Akun OPD Anda pada aplikasi e-Honai Connect telah diaktifkan oleh Admin Diskominfosatik Provinsi Papua Pegunungan.' . "\n\n"
@@ -248,6 +248,14 @@ class UserController extends BaseController
                 '[e-Honai Connect] Akun OPD Anda telah diaktifkan',
                 $bodyOpd
             );
+
+            $toOpdWa = trim((string) ($user->no_hp ?? ''));
+            if ($toOpdWa !== '') {
+                sendWhatsAppNotification(
+                    $toOpdWa,
+                    ehonai_whatsapp_opd_activated_message($user)
+                );
+            }
         }
 
         return redirect()->to('/user')->with('success', 'Status akun pengguna berhasil diperbarui.');

@@ -41,7 +41,20 @@ if ($waDigits !== '' && str_starts_with($waDigits, '0')) {
 <div class="d-flex flex-wrap justify-content-between align-items-start gap-3 mb-4">
     <div>
         <h1 class="h4 fw-semibold text-secondary mb-1">Detail Tiket</h1>
-        <p class="mb-0"><code><?= esc($ticket->nomor_tiket) ?></code></p>
+        <p class="mb-0">
+            <code><?= esc($ticket->nomor_tiket) ?></code>
+            <?php if (($ticket->source ?? 'manual') === 'librenms') : ?>
+                <span class="badge bg-info text-dark ms-1">LibreNMS</span>
+            <?php endif; ?>
+        </p>
+        <?php if (! empty($ticket->librenms_hostname) && (int) ($ticket->librenms_device_id ?? 0) > 0) : ?>
+            <?php $lnms = \Config\Services::librenms(); ?>
+            <?php if ($lnms->isConfigured()) : ?>
+                <a href="<?= esc($lnms->deviceUrl((string) $ticket->librenms_hostname)) ?>" class="small" target="_blank" rel="noopener">
+                    <i class="bi bi-hdd-network me-1"></i>Lihat perangkat di LibreNMS
+                </a>
+            <?php endif; ?>
+        <?php endif; ?>
     </div>
     <a href="<?= base_url('ticket') ?>" class="btn btn-outline-secondary btn-sm">Kembali ke daftar</a>
 </div>

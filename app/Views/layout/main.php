@@ -316,6 +316,9 @@
                     <i class="bi bi-question-circle"></i> Pusat Bantuan (FAQ)
                 </a>
                 <?php if (session()->get('role') === 'admin') : ?>
+                    <a class="nav-link <?= uri_string() === 'monitoring' || str_starts_with(uri_string(), 'monitoring/') ? 'active' : '' ?>" href="<?= base_url('monitoring') ?>">
+                        <i class="bi bi-hdd-network"></i> Monitoring Perangkat
+                    </a>
                     <a class="nav-link <?= uri_string() === 'user' || str_starts_with(uri_string(), 'user/') ? 'active' : '' ?>" href="<?= base_url('user') ?>">
                         <i class="bi bi-building-gear"></i> Manajemen OPD
                     </a>

@@ -19,14 +19,21 @@ use CodeIgniter\Config\BaseService;
  */
 class Services extends BaseService
 {
-    /*
-     * public static function example($getShared = true)
-     * {
-     *     if ($getShared) {
-     *         return static::getSharedInstance('example');
-     *     }
-     *
-     *     return new \CodeIgniter\Example();
-     * }
-     */
+    public static function whatsapp(bool $getShared = true): \App\Libraries\WhatsAppService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('whatsapp');
+        }
+
+        return new \App\Libraries\WhatsAppService();
+    }
+
+    public static function librenms(bool $getShared = true): \App\Libraries\LibreNMSService
+    {
+        if ($getShared) {
+            return static::getSharedInstance('librenms');
+        }
+
+        return new \App\Libraries\LibreNMSService();
+    }
 }

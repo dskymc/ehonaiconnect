@@ -6,6 +6,7 @@ namespace App\Controllers;
 use App\Models\NotificationModel;
 use App\Models\TicketModel;
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\Services;
 
 class Dashboard extends BaseController
 {
@@ -18,8 +19,12 @@ class Dashboard extends BaseController
         $ticketModel = model(TicketModel::class);
         $ticketStats = $ticketModel->getDashboardTicketStats($role, $uid);
 
+        $nmsSummary = Services::librenms()->getDashboardSummary();
+
         return view('dashboard/index', [
             'ticketStats' => $ticketStats,
+            'nmsSummary'  => $nmsSummary,
+            'showNms'     => session()->get('role') === 'admin',
         ]);
     }
 

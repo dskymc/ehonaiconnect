@@ -62,12 +62,14 @@ class RegisterController extends BaseController
             return redirect()->back()->withInput()->with('error', implode(' ', $userModel->errors()));
         }
 
-        helper(['email']);
-        $noHpReg = (string) $this->request->getPost('no_hp');
+        helper(['email', 'whatsapp']);
+        $noHpReg  = (string) $this->request->getPost('no_hp');
         $emailReg = $emailRaw === '' ? '-' : $emailRaw;
+        $namaReg  = (string) $this->request->getPost('nama_lengkap');
+        $userReg  = (string) $this->request->getPost('username');
         $bodyAdmin = 'OPD baru mendaftar melalui formulir registrasi e-Honai Connect.' . "\n\n"
-            . 'Nama lengkap: ' . (string) $this->request->getPost('nama_lengkap') . "\n"
-            . 'Username: ' . (string) $this->request->getPost('username') . "\n"
+            . 'Nama lengkap: ' . $namaReg . "\n"
+            . 'Username: ' . $userReg . "\n"
             . 'Instansi OPD: ' . $instansiPost . "\n"
             . 'Nomor WhatsApp: ' . $noHpReg . "\n"
             . 'Email: ' . $emailReg . "\n\n"
@@ -80,6 +82,14 @@ class RegisterController extends BaseController
                 $bodyAdmin
             );
         }
+
+        ehonai_send_whatsapp_to_admins(ehonai_whatsapp_opd_registration_admin_message(
+            $namaReg,
+            $userReg,
+            $instansiPost,
+            $noHpReg,
+            $emailReg
+        ));
 
         return redirect()->to('/login')->with(
             'success',

@@ -8,6 +8,8 @@ use CodeIgniter\Router\RouteCollection;
  */
 $routes->get('/', 'Home::index');
 
+$routes->post('webhook/librenms', 'Webhook\LibreNMSController::receive');
+
 $routes->get('login', 'AuthController::index');
 $routes->post('login', 'AuthController::process');
 $routes->get('register', 'RegisterController::index');
@@ -70,6 +72,12 @@ $routes->group('faq', ['filter' => 'auth'], static function ($routes) {
 | GET report       — filter & tabel rekap
 | GET report/print — halaman cetak HTML (tab baru)
 */
+$routes->group('monitoring', ['filter' => 'auth'], static function ($routes) {
+    $routes->get('/', 'MonitoringController::index');
+    $routes->get('alerts', 'MonitoringController::alerts');
+    $routes->get('device/(:segment)', 'MonitoringController::device/$1');
+});
+
 $routes->group('report', ['filter' => 'admin'], static function ($routes) {
     $routes->get('/', 'ReportController::index');
     $routes->get('print', 'ReportController::print');
